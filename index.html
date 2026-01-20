@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Модуль обработки и фильтрации данных</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #2196F3;
+            --success-color: #4CAF50;
+            --danger-color: #f44336;
+            --warning-color: #ff9800;
+            --text-color: #333;
+            --bg-color: #f5f5f5;
+            --white: #ffffff;
+            --shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary-color), #1976D2);
+            color: var(--white);
+            padding: 30px 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            box-shadow: var(--shadow);
+        }
+
+        header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 0.95em;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: var(--white);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+        }
+
+        .card h2 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            font-size: 1.3em;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        input[type="file"],
+        input[type="text"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        input[type="file"]:focus,
+        input[type="text"]:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: var(--white);
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: background-color 0.3s ease, transform 0.1s ease;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+
+        button:hover {
+            background-color: #1976D2;
+            transform: translateY(-1px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        button.secondary {
+            background-color: #757575;
+        }
+
+        button.secondary:hover {
+            background-color: #616161;
+        }
+
+        button.danger {
+            background-color: var(--danger-color);
+        }
+
+        button.danger:hover {
+            background-color: #da190b;
+        }
+
+        button.success {
+            background-color: var(--success-color);
+        }
+
+        button.success:hover {
+            background-color: #45a049;
+        }
+
+        .button-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .message {
+            padding: 12px 16px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+
+        .message.show {
+            display: block;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .message.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .message.info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-box {
+            background: linear-gradient(135deg, var(--primary-color), #1976D2);
+            color: var(--white);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            opacity: 0.9;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            background: var(--white);
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background-color: var(--primary-color);
+            color: var(--white);
+        }
+
+        th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+        }
+
+        th:hover {
+            background-color: #1976D2;
+        }
+
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        tbody tr:hover {
+            background-color: #f9f9f9;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: #fafafa;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        .sample-data {
+            background-color: #f0f0f0;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            overflow-x: auto;
+            max-height: 200px;
+            overflow-y: auto;
+            margin-bottom: 15px;
+        }
+
+        .sample-data pre {
+            margin: 0;
+        }
+
+        .filter-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .filter-controls input,
+        .filter-controls select {
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999;
+        }
+
+        .empty-state svg {
+            width: 64px;
+            height: 64px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .download-section {
+            background: var(--white);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            color: #666;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .tab:hover {
+            color: var(--primary-color);
+        }
+
+        .tab.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--primary-color);
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📊 Модуль обработки и фильтрации данных</h1>
+            <p>Учебная информационная система для обработки и анализа табличных данных (CSV, JSON, TXT)</p>
+        </header>
+
+        <!-- Вкладки -->
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab(event, 'data-input')">📥 Загрузка</div>
+            <div class="tab" onclick="switchTab(event, 'processing')">⚙️ Обработка</div>
+            <div class="tab" onclick="switchTab(event, 'results')">📈 Результаты</div>
+            <div class="tab" onclick="switchTab(event, 'help')">❓ Справка</div>
+        </div>
+
+        <!-- ============ ВКЛАДКА 1: ЗАГРУЗКА ============ -->
+        <div id="data-input" class="tab-content active">
+            <div class="main-content">
+                <div class="card">
+                    <h2>Загрузка файла</h2>
+                    <div class="form-group">
+                        <label for="file-input">Выберите файл (CSV, JSON или TXT):</label>
+                        <input type="file" id="file-input" accept=".csv,.json,.txt">
+                    </div>
+                    <button onclick="loadFile()">📂 Загрузить файл</button>
+                    <div id="file-message" class="message"></div>
+                </div>
+
+                <div class="card">
+                    <h2>Или используйте примеры</h2>
+                    <button onclick="loadSample('csv')" class="success">Пример CSV</button>
+                    <button onclick="loadSample('json')" class="success">Пример JSON</button>
+                    <p style="margin-top: 15px; font-size: 0.9em; color: #666;">Кликните на кнопку, чтобы загрузить демонстрационные данные о товарах.</p>
+                </div>
+            </div>
+
+            <div class="card full-width">
+                <h2>Информация о формате данных</h2>
+                <p><strong>Требуемые поля:</strong> код, наименование, категория, количество, цена</p>
+                <p style="margin-top: 10px; margin-bottom: 15px;">Приложение автоматически определяет формат файла по расширению и обрабатывает данные.</p>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div>
+                        <h3 style="color: var(--primary-color); margin-bottom: 10px;">Пример CSV:</h3>
+                        <div class="sample-data"><pre>код,наименование,категория,количество,цена
+001,Товар А,Электроника,50,5000
+002,Товар Б,Одежда,100,1500</pre></div>
+                    </div>
+                    <div>
+                        <h3 style="color: var(--primary-color); margin-bottom: 10px;">Пример JSON:</h3>
+                        <div class="sample-data"><pre>[
+  {"код":"001","наименование":"Товар А","категория":"Электроника","количество":"50","цена":"5000"},
+  {"код":"002","наименование":"Товар Б","категория":"Одежда","количество":"100","цена":"1500"}
+]</pre></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============ ВКЛАДКА 2: ОБРАБОТКА ============ -->
+        <div id="processing" class="tab-content">
+            <div class="card full-width">
+                <h2>⚙️ Фильтрация и сортировка</h2>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                    <div>
+                        <h3 style="color: var(--primary-color); margin-bottom: 15px;">Фильтры</h3>
+                        
+                        <div class="form-group">
+                            <label for="filter-field">Поле для фильтрации:</label>
+                            <select id="filter-field">
+                                <option value="">-- Выберите поле --</option>
+                                <option value="категория">Категория</option>
+                                <option value="цена">Цена (диапазон)</option>
+                                <option value="количество">Количество (диапазон)</option>
+                                <option value="наименование">Наименование</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="filter-value">Значение фильтра:</label>
+                            <input type="text" id="filter-value" placeholder="Введите значение для фильтра">
+                        </div>
+
+                        <button onclick="applyFilter()">🔍 Применить фильтр</button>
+                        <button onclick="clearFilters()" class="secondary">❌ Очистить фильтры</button>
+                        <div id="filter-message" class="message"></div>
+                    </div>
+
+                    <div>
+                        <h3 style="color: var(--primary-color); margin-bottom: 15px;">Сортировка</h3>
+                        
+                        <div class="form-group">
+                            <label for="sort-field">Поле для сортировки:</label>
+                            <select id="sort-field">
+                                <option value="">-- Выберите поле --</option>
+                                <option value="код">Код</option>
+                                <option value="наименование">Наименование</option>
+                                <option value="категория">Категория</option>
+                                <option value="количество">Количество</option>
+                                <option value="цена">Цена</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="sort-order">Порядок сортировки:</label>
+                            <select id="sort-order">
+                                <option value="asc">🔼 По возрастанию</option>
+                                <option value="desc">🔽 По убыванию</option>
+                            </select>
+                        </div>
+
+                        <button onclick="applySorting()" class="success">↕️ Применить сортировку</button>
+                        <div id="sort-message" class="message"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card full-width" style="margin-top: 20px;">
+                <h2>📊 Расчёт итоговых значений</h2>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                    <div class="form-group">
+                        <button onclick="calculateStats('количество')" class="success">Статистика по количеству</button>
+                    </div>
+                    <div class="form-group">
+                        <button onclick="calculateStats('цена')" class="success">Статистика по цене</button>
+                    </div>
+                    <div class="form-group">
+                        <button onclick="calculateStats('all')" class="success">Полная статистика</button>
+                    </div>
+                </div>
+
+                <div id="stats-container" style="margin-top: 20px;"></div>
+            </div>
+        </div>
+
+        <!-- ============ ВКЛАДКА 3: РЕЗУЛЬТАТЫ ============ -->
+        <div id="results" class="tab-content">
+            <div class="card full-width">
+                <h2>Просмотр и скачивание данных</h2>
+                
+                <div class="button-group">
+                    <button onclick="exportData('csv')" class="success">📥 Скачать CSV</button>
+                    <button onclick="exportData('json')" class="success">📥 Скачать JSON</button>
+                    <button onclick="exportData('txt')" class="success">📥 Скачать TXT</button>
+                    <button onclick="printTable()" class="secondary">🖨️ Печать</button>
+                </div>
+
+                <div id="table-message" class="message"></div>
+                
+                <div class="table-container" id="table-container">
+                    <div class="empty-state">
+                        <p>📭 Нет данных для отображения</p>
+                        <p style="margin-top: 10px; font-size: 0.9em;">Загрузите файл на вкладке &quot;Загрузка&quot;</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============ ВКЛАДКА 4: СПРАВКА ============ -->
+        <div id="help" class="tab-content">
+            <div class="card full-width">
+                <h2>❓ Справка и документация</h2>
+                
+                <h3 style="margin-top: 20px; margin-bottom: 10px; color: var(--primary-color);">Архитектура приложения</h3>
+                <p><strong>Frontend:</strong> HTML5 + CSS + JavaScript (веб-интерфейс)</p>
+                <p><strong>Backend:</strong> Python + Flask (обработка данных)</p>
+                <p style="margin-top: 10px; margin-bottom: 15px;">Приложение использует клиент-серверную архитектуру с REST API для связи между frontend и backend.</p>
+
+                <h3 style="margin-top: 20px; margin-bottom: 10px; color: var(--primary-color);">Функциональные возможности</h3>
+                <ul style="margin-left: 20px;">
+                    <li><strong>Загрузка данных:</strong> Поддержка форматов CSV, JSON, TXT</li>
+                    <li><strong>Фильтрация:</strong> По одному или нескольким критериям (категория, диапазон цены/количества, текст)</li>
+                    <li><strong>Сортировка:</strong> По выбранному полю в порядке возрастания или убывания</li>
+                    <li><strong>Расчёты:</strong> Сумма, количество, среднее значение, минимум, максимум для числовых полей</li>
+                    <li><strong>Сохранение:</strong> Экспорт результатов в CSV, JSON, TXT форматы</li>
+                </ul>
+
+                <h3 style="margin-top: 20px; margin-bottom: 10px; color: var(--primary-color);">Обрабатываемые поля</h3>
+                <table style="width: 100%; margin-top: 10px;">
+                    <tr style="background-color: #f0f0f0;">
+                        <th style="text-align: left; padding: 10px; border: 1px solid #ddd;">Поле</th>
+                        <th style="text-align: left; padding: 10px; border: 1px solid #ddd;">Описание</th>
+                        <th style="text-align: left; padding: 10px; border: 1px solid #ddd;">Тип</th>
+                    </tr>
+                    <tr>
+                        <td style="padding: 10px; border: 1px solid #ddd;">код</td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">Уникальный идентификатор товара</td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">Текст</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 10px; border: 1px solid #ddd;">наименование</td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">Название товара</td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">Текст</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 10px; border: 1px solid #ddd;">категория</td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">Классификация товара</td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">Текст</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 10px; border: 1px solid #ddd;">количество</td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">Количество в наличии</td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">Число</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 10px; border: 1px solid #ddd;">цена</td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">Цена товара</td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">Число</td>
+                    </tr>
+                </table>
+
+                <h3 style="margin-top: 20px; margin-bottom: 10px; color: var(--primary-color);">Обработка ошибок</h3>
+                <ul style="margin-left: 20px;">
+                    <li>Ошибки чтения файла (неправильный формат, повреждённый файл)</li>
+                    <li>Некорректный формат данных (отсутствие ожидаемых полей)</li>
+                    <li>Отсутствие обязательных полей</li>
+                    <li>Некорректные значения в числовых полях</li>
+                </ul>
+
+                <h3 style="margin-top: 20px; margin-bottom: 10px; color: var(--primary-color);">API Endpoints</h3>
+                <ul style="margin-left: 20px;">
+                    <li><strong>POST /api/upload</strong> - Загрузка файла</li>
+                    <li><strong>POST /api/filter</strong> - Применение фильтра</li>
+                    <li><strong>POST /api/sort</strong> - Сортировка данных</li>
+                    <li><strong>POST /api/stats</strong> - Расчёт статистики</li>
+                    <li><strong>POST /api/export/&lt;format&gt;</strong> - Экспорт данных</li>
+                    <li><strong>POST /api/reset</strong> - Сброс фильтров</li>
+                    <li><strong>GET /api/sample/&lt;format&gt;</strong> - Получить примеры данных</li>
+                </ul>
+
+                <h3 style="margin-top: 20px; margin-bottom: 10px; color: var(--primary-color);">Установка и запуск</h3>
+                <p><strong>Требования:</strong></p>
+                <ul style="margin-left: 20px; margin-bottom: 15px;">
+                    <li>Python 3.7+</li>
+                    <li>Flask</li>
+                    <li>Flask-CORS</li>
+                    <li>pandas (опционально)</li>
+                </ul>
+                <p><strong>Установка зависимостей:</strong></p>
+                <div class="sample-data"><pre>pip install flask flask-cors pandas</pre></div>
+                <p><strong>Запуск приложения:</strong></p>
+                <div class="sample-data"><pre>python app.py</pre></div>
+                <p>Приложение будет доступно по адресу: <strong>http://localhost:5000</strong></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============ ПЕРЕМЕННЫЕ ============
+        let currentSessionId = null;
+        const API_URL = 'http://localhost:5000';
+
+        // ============ ФУНКЦИИ ЗАГРУЗКИ ============
+        function loadFile() {
+            const fileInput = document.getElementById('file-input');
+            const file = fileInput.files[0];
+            const messageEl = document.getElementById('file-message');
+
+            if (!file) {
+                showMessage(messageEl, 'Пожалуйста, выберите файл', 'error');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const btn = event.target;
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span>Загрузка...';
+
+            fetch(`${API_URL}/api/upload`, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                btn.disabled = false;
+                btn.innerHTML = '📂 Загрузить файл';
+
+                if (data.success) {
+                    currentSessionId = data.session_id;
+                    showMessage(messageEl, `✓ ${data.message}`, 'success');
+                    renderTable(data.data);
+                    switchTab(null, 'results');
+                    fileInput.value = '';
+                } else {
+                    showMessage(messageEl, `✗ ${data.message}`, 'error');
+                }
+            })
+            .catch(error => {
+                btn.disabled = false;
+                btn.innerHTML = '📂 Загрузить файл';
+                showMessage(messageEl, `✗ Ошибка: ${error.message}`, 'error');
+            });
+        }
+
+        function loadSample(format) {
+            const btn = event.target;
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span>Загрузка...';
+
+            fetch(`${API_URL}/api/sample/${format}`)
+            .then(response => response.json())
+            .then(data => {
+                btn.disabled = false;
+                btn.innerHTML = format === 'csv' ? 'Пример CSV' : 'Пример JSON';
+
+                if (data.success) {
+                    currentSessionId = data.session_id;
+                    showMessage(document.getElementById('file-message'), `✓ ${data.message}`, 'success');
+                    renderTable(data.data);
+                    switchTab(null, 'results');
+                } else {
+                    showMessage(document.getElementById('file-message'), `✗ ${data.message}`, 'error');
+                }
+            })
+            .catch(error => {
+                btn.disabled = false;
+                btn.innerHTML = format === 'csv' ? 'Пример CSV' : 'Пример JSON';
+                showMessage(document.getElementById('file-message'), `✗ Ошибка: ${error.message}`, 'error');
+            });
+        }
+
+        // ============ ФУНКЦИИ ОБРАБОТКИ ============
+        function applyFilter() {
+            if (!currentSessionId) {
+                showMessage(document.getElementById('filter-message'), 'Сначала загрузите файл', 'error');
+                return;
+            }
+
+            const field = document.getElementById('filter-field').value;
+            const value = document.getElementById('filter-value').value;
+            const messageEl = document.getElementById('filter-message');
+
+            if (!field || !value) {
+                showMessage(messageEl, 'Выберите поле и введите значение', 'error');
+                return;
+            }
+
+            const operator = field === 'цена' || field === 'количество' ? 'range' : 'contains';
+
+            fetch(`${API_URL}/api/filter`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    session_id: currentSessionId,
+                    field: field,
+                    value: value,
+                    operator: operator
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showMessage(messageEl, `✓ ${data.message}`, 'success');
+                    renderTable(data.data);
+                    switchTab(null, 'results');
+                } else {
+                    showMessage(messageEl, `✗ ${data.message}`, 'error');
+                }
+            })
+            .catch(error => {
+                showMessage(messageEl, `✗ Ошибка: ${error.message}`, 'error');
+            });
+        }
+
+        function clearFilters() {
+            if (!currentSessionId) {
+                showMessage(document.getElementById('filter-message'), 'Сначала загрузите файл', 'error');
+                return;
+            }
+
+            fetch(`${API_URL}/api/reset`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ session_id: currentSessionId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('filter-field').value = '';
+                    document.getElementById('filter-value').value = '';
+                    showMessage(document.getElementById('filter-message'), 'Фильтры очищены', 'info');
+                    renderTable(data.data);
+                } else {
+                    showMessage(document.getElementById('filter-message'), `✗ ${data.message}`, 'error');
+                }
+            })
+            .catch(error => {
+                showMessage(document.getElementById('filter-message'), `✗ Ошибка: ${error.message}`, 'error');
+            });
+        }
+
+        function applySorting() {
+            if (!currentSessionId) {
+                showMessage(document.getElementById('sort-message'), 'Сначала загрузите файл', 'error');
+                return;
+            }
+
+            const field = document.getElementById('sort-field').value;
+            const order = document.getElementById('sort-order').value;
+            const messageEl = document.getElementById('sort-message');
+
+            if (!field) {
+                showMessage(messageEl, 'Выберите поле для сортировки', 'error');
+                return;
+            }
+
+            fetch(`${API_URL}/api/sort`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    session_id: currentSessionId,
+                    field: field,
+                    order: order
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showMessage(messageEl, `✓ ${data.message}`, 'success');
+                    renderTable(data.data);
+                } else {
+                    showMessage(messageEl, `✗ ${data.message}`, 'error');
+                }
+            })
+            .catch(error => {
+                showMessage(messageEl, `✗ Ошибка: ${error.message}`, 'error');
+            });
+        }
+
+        function calculateStats(field) {
+            if (!currentSessionId) {
+                showMessage(document.getElementById('table-message'), 'Сначала загрузите файл', 'error');
+                return;
+            }
+
+            fetch(`${API_URL}/api/stats`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    session_id: currentSessionId,
+                    field: field === 'all' ? null : field
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    renderStats(data.stats);
+                } else {
+                    showMessage(document.getElementById('table-message'), `✗ ${data.message}`, 'error');
+                }
+            })
+            .catch(error => {
+                showMessage(document.getElementById('table-message'), `✗ Ошибка: ${error.message}`, 'error');
+            });
+        }
+
+        function renderStats(stats) {
+            const container = document.getElementById('stats-container');
+            let html = '<div class="stats">';
+
+            for (const [field, values] of Object.entries(stats)) {
+                html += `
+                    <div class="stat-box">
+                        <div class="stat-label">${field} - Сумма</div>
+                        <div class="stat-value">${values.сумма.toFixed(2)}</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">${field} - Среднее</div>
+                        <div class="stat-value">${values.среднее.toFixed(2)}</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">${field} - Минимум</div>
+                        <div class="stat-value">${values.минимум}</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">${field} - Максимум</div>
+                        <div class="stat-value">${values.максимум}</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">${field} - Записей</div>
+                        <div class="stat-value">${values.записей}</div>
+                    </div>
+                `;
+            }
+
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        // ============ ФУНКЦИИ ЭКСПОРТА ============
+        function exportData(format) {
+            if (!currentSessionId) {
+                showMessage(document.getElementById('table-message'), 'Нет данных для экспорта', 'error');
+                return;
+            }
+
+            const btn = event.target;
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span>Подготовка...';
+
+            fetch(`${API_URL}/api/export/${format}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ session_id: currentSessionId })
+            })
+            .then(response => {
+                btn.disabled = false;
+                btn.innerHTML = format === 'csv' ? '📥 Скачать CSV' : format === 'json' ? '📥 Скачать JSON' : '📥 Скачать TXT';
+
+                if (!response.ok) throw new Error('Ошибка скачивания');
+                return response.blob();
+            })
+            .then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `data.${format}`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+                showMessage(document.getElementById('table-message'), `✓ ${format.toUpperCase()} файл скачан`, 'success');
+            })
+            .catch(error => {
+                showMessage(document.getElementById('table-message'), `✗ Ошибка: ${error.message}`, 'error');
+            });
+        }
+
+        function printTable() {
+            const table = document.querySelector('table');
+            if (!table) {
+                showMessage(document.getElementById('table-message'), 'Нет данных для печати', 'error');
+                return;
+            }
+
+            const printWindow = window.open('', '', 'width=1200,height=600');
+            printWindow.document.write(table.outerHTML);
+            printWindow.document.close();
+            printWindow.print();
+        }
+
+        // ============ ФУНКЦИИ ОТОБРАЖЕНИЯ ============
+        function renderTable(data) {
+            const container = document.getElementById('table-container');
+
+            if (!data || data.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <p>📭 Нет данных для отображения</p>
+                        <p style="margin-top: 10px; font-size: 0.9em;">Проверьте фильтры или загрузите новый файл</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const headers = Object.keys(data[0]);
+            let html = '<table><thead><tr>';
+            
+            headers.forEach(h => {
+                html += `<th>${h}</th>`;
+            });
+            html += '</tr></thead><tbody>';
+
+            data.forEach(row => {
+                html += '<tr>';
+                headers.forEach(h => {
+                    html += `<td>${row[h]}</td>`;
+                });
+                html += '</tr>';
+            });
+
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        function switchTab(event, tabName) {
+            if (event) event.preventDefault();
+
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+
+            document.getElementById(tabName).classList.add('active');
+            
+            if (event) {
+                event.target.classList.add('active');
+            } else {
+                document.querySelector(`[onclick*="'${tabName}'"]`)?.classList.add('active');
+            }
+        }
+
+        function showMessage(element, text, type) {
+            element.textContent = text;
+            element.className = `message ${type} show`;
+            setTimeout(() => {
+                element.classList.remove('show');
+            }, 5000);
+        }
+    </script>
+</body>
+</html>
