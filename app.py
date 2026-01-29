@@ -589,6 +589,171 @@ def not_found(e):
 def server_error(e):
     return jsonify({'error': 'Ошибка сервера'}), 500
 
+# ============ API ИНТЕГРАЦИЯ (ТЗ: Интеграция модулей через API) ============
+
+@app.route('/api/v1/data', methods=['GET'])
+def api_v1_get_data():
+    """3.1.1 Получение данных через API"""
+    try:
+        # Загружаем данные из файла
+        processor = DataProcessor()
+        with open('товары.csv', 'r', encoding='utf-8-sig') as f:
+            content = f.read()
+        success, message = processor.load_csv(content)
+
+        if success:
+            return jsonify({
+                'status': 'success',
+                'count': len(processor.get_data()),
+                'data': processor.get_data()
+            }), 200
+        else:
+            return jsonify({'status': 'error', 'message': message}), 400
+    except FileNotFoundError:
+        return jsonify({'status': 'error', 'message': 'Файл tovary.csv не найден'}), 404
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+@app.route('/api/v1/data', methods=['POST'])
+def api_v1_post_data():
+    """3.1.2 Передача данных через API"""
+    try:
+        data = request.json
+
+        # Валидация
+        if not isinstance(data, list):
+            return jsonify({'status': 'error', 'message': 'Данные должны быть массивом объектов'}), 400
+
+        if not data:
+            return jsonify({'status': 'error', 'message': 'Массив данных пуст'}), 400
+
+        # Проверка обязательных полей
+        required_fields = ['код', 'наименование', 'категория', 'количество', 'цена']
+        for item in data:
+            missing = [f for f in required_fields if f not in item]
+            if missing:
+                return jsonify({
+                    'status': 'error',
+                    'message': f'Отсутствуют поля: {", ".join(missing)}'
+                }), 400
+
+        # Сохраняем в CSV
+        processor = DataProcessor()
+        processor.data = data
+        csv_content = processor.export_csv()
+
+        with open('data/api_uploaded.csv', 'w', encoding='utf-8-sig') as f:
+            f.write(csv_content)
+
+        return jsonify({
+            'status': 'success',
+            'message': f'Сохранено {len(data)} записей',
+            'saved_to': 'data/api_uploaded.csv'
+        }), 201
+
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+@app.route('/api/v1/filter', methods=['POST'])
+def api_v1_filter():
+    """3.1.3 Обработка запросов - фильтрация через API"""
+    try:
+        params = request.json or {}
+
+        # Загружаем данные
+        processor = DataProcessor()
+        with open('товары.csv', 'r', encoding='utf-8-sig') as f:
+            content = f.read()
+        processor.load_csv(content)
+
+        # Применяем фильтры
+        filtered_data = processor.get_data()
+
+        # Фильтр по категории
+        if 'категория' in params and params['категория']:
+            filtered_data = [
+                row for row in filtered_data
+                if params['категория'].lower() in row.get('категория', '').lower()
+            ]
+
+        # Фильтр по минимальной цене
+        if 'min_price' in params:
+            try:
+                min_price = float(params['min_price'])
+                filtered_data = [
+                    row for row in filtered_data
+                    if float(row.get('цена', 0)) >= min_price
+                ]
+            except ValueError:
+                return jsonify({'status': 'error', 'message': 'min_price должна быть числом'}), 400
+
+        # Фильтр по максимальной цене
+        if 'max_price' in params:
+            try:
+                max_price = float(params['max_price'])
+                filtered_data = [
+                    row for row in filtered_data
+                    if float(row.get('цена', 0)) <= max_price
+                ]
+            except ValueError:
+                return jsonify({'status': 'error', 'message': 'max_price должна быть числом'}), 400
+
+        # Фильтр по наименованию
+        if 'наименование' in params and params['наименование']:
+            filtered_data = [
+                row for row in filtered_data
+                if params['наименование'].lower() in row.get('наименование', '').lower()
+            ]
+
+        return jsonify({
+            'status': 'success',
+            'count': len(filtered_data),
+            'filters': params,
+            'data': filtered_data
+        }), 200
+
+    except FileNotFoundError:
+        return jsonify({'status': 'error', 'message': 'Файл tovary.csv не найден'}), 404
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+@app.route('/api/v1/stats', methods=['POST'])
+def api_v1_stats():
+    """Статистика через API"""
+    try:
+        params = request.json or {}
+
+        processor = DataProcessor()
+        with open('товары.csv', 'r', encoding='utf-8-sig') as f:
+            content = f.read()
+        processor.load_csv(content)
+
+        # Применяем фильтры если есть
+        if 'категория' in params:
+            processor.filter_data('категория', params['категория'], 'contains')
+
+        success, stats = processor.calculate_stats()
+
+        return jsonify({
+            'status': 'success',
+            'stats': stats
+        }), 200
+
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+# Обработка ошибок API
+@app.errorhandler(400)
+def bad_request(e):
+    return jsonify({'status': 'error', 'message': 'Некорректный запрос'}), 400
+
+@app.errorhandler(405)
+def method_not_allowed(e):
+    return jsonify({'status': 'error', 'message': 'Метод не поддерживается'}), 405
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
