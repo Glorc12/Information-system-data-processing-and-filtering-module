@@ -4,19 +4,33 @@
 text
 Information-system-data-processing-and-filtering-module/
 │
+
 ├── app.py                      # Python backend (Flask) с REST API
+
 ├── api_client.py               # Клиентская часть для тестирования API
+
 ├── requirements.txt            # Зависимости проекта
+
 ├── API_DOCUMENTATION.md        # Документация REST API
+
 ├── ОТЧЁТ.md                    # Отчёт по практике
+
 ├── GIT_ИНСТРУКЦИЯ.md           # Инструкция по загрузке на GitHub
+
 ├── templates/
+
 │   └── index.html             # HTML frontend (веб-интерфейс)
+
 ├── data/                      # Папка для загруженных через API данных
+
 ├── товары.csv                 # Пример данных (CSV)
+
 ├── товары.json                # Пример данных (JSON)
+
 ├── товары.txt                 # Пример данных (TXT)
+
 └── README.md                  # Этот файл
+
 🎯 Описание проекта
 Назначение: Учебный программный модуль для обработки и фильтрации данных информационной системы с интеграцией модулей через REST API.
 
